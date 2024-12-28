@@ -27,6 +27,33 @@ app.use(
   })
 )
 
+app.post('/', async (p) => {
+  p.header('Access-Control-Allow-Origin', '*');
+
+  const contactPrivacy = p.req.queries('privacy')?.shift() || "false"
+  if (contactPrivacy == "false") {
+    console.error("Privacy policy was not accepted")
+    return p.json({
+      error: "Privacy policy was not accepted",
+      valid: ['true']
+    }, 406)
+  }
+
+  const contactName = p.req.queries('name')?.shift() || null
+  if (contactName == null) {
+    return p.json({
+      error: "Name was not filled out"
+    }, 406)
+  }
+
+  return p.json({
+    debug: {
+      privacy:  contactPrivacy,
+      name:     contactName
+    }
+  }, 200)
+})
+
 app.get('/', async (c) => {
   c.header('Access-Control-Allow-Origin', '*');
   const type = c.req.queries('type')?.shift()
