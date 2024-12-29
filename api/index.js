@@ -30,28 +30,68 @@ app.use(
 app.post('/', async (p) => {
   p.header('Access-Control-Allow-Origin', '*');
 
-  const contactPrivacy = p.req.queries('privacy')?.shift() || "false"
-  if (contactPrivacy == "false") {
-    console.error("Privacy policy was not accepted")
-    return p.json({
-      error: "Privacy policy was not accepted",
-      valid: ['true']
-    }, 406)
-  }
+  const postAction = p.req.queries('action')?.shift() || null
 
-  const contactName = p.req.queries('name')?.shift() || null
-  if (contactName == null) {
-    return p.json({
-      error: "Name was not filled out"
-    }, 406)
-  }
+  switch (postAction) {
+    case 'contactForm':
+      const contactPrivacy = p.req.queries('privacy')?.shift() || "false"
+      if (contactPrivacy == "false") {
+        console.error("Privacy policy was not accepted")
+        return p.json({
+          error: "Privacy policy was not accepted",
+          valid: ['true']
+        }, 406)
+      }
 
-  return p.json({
-    debug: {
-      privacy:  contactPrivacy,
-      name:     contactName
-    }
-  }, 200)
+      const contactName = p.req.queries('name')?.shift() || null
+      if (contactName == null) {
+        console.error("Name was not filled out")
+        return p.json({
+          error: "Name was not filled out"
+        }, 406)
+      }
+
+      const contactPronouns = p.req.queries('pronouns')?.shift() || null
+
+      const contactEmail = p.req.queries('email')?.shift() || null
+      if (contactEmail == null) {
+        console.error("E-Mail was not filled out")
+        return p.json({
+          error: "E-Mail was not filled out"
+        }, 406)
+      }
+
+      const contactMessage = p.req.queries('message')?.shift() || null
+      if (contactMessage == null) {
+        console.error("Message was not filled out")
+        return p.json({
+          error: "Message was not filled out"
+        }, 406)
+      }
+
+      return p.json({
+        debug: {
+          privacy:  contactPrivacy,
+          name:     contactName,
+          pronouns: contactPronouns,
+          email:    contactEmail,
+          message:  contactMessage
+        }
+      }, 200)
+
+      break;
+  
+    default:
+      console.error(`Missing or invalid Action: ${postAction}`);
+      return p.json({
+        error: 'Missing or invalid Action',
+        valid: ['contactForm'],
+        debug: {
+          action: postAction
+        }
+      }, 406);
+      break;
+  }
 })
 
 app.get('/', async (c) => {
