@@ -69,16 +69,24 @@ app.post('/', async (p) => {
         }, 406)
       }
 
-      return p.json({
-        debug: {
-          privacy:  contactPrivacy,
-          name:     contactName,
-          pronouns: contactPronouns,
-          email:    contactEmail,
-          message:  contactMessage
-        }
-      }, 200)
+      try {
+        const contactGoogleUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfyYrYSRy_guWcCBKF0wAfPqhZzxQT3ofOjqE8iJLZvqsxQ3w/formResponse?submit=Submit&usp=pp_url&entry.866128707=${contactName}&entry.912764904=${contactPronouns}&entry.1166196952=${contactEmail}&entry.1215915974=${contactMessage}&entry.431160396=${contactPrivacy}`
 
+        const contactRes = await fetch(contactGoogleUrl)
+        if (contactRes.status == 200) {
+          return p.json({ message: "Message send" })
+        } else {
+          return p.json(undefined, {status: 500})
+        }
+      } catch (error) {
+        console.error(error);
+        return p.json({
+          error: 'An error occured',
+          debug: {
+            error: null
+          }
+        }, 500);
+      }
       break;
   
     default:
